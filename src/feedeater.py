@@ -1,6 +1,14 @@
 import feedparser
+import storage
 
-def parse_feeds(feeds):
+def get_feeds():
+    db = storage.LinksDB()
+    feeds = db.get_feeds()
+    return feeds
+
+
+def parse_feeds():
+    feeds = get_feeds()
     for feed in feeds:
         feed_name, feed_url = feed
         news = feedparser.parse(feed_url)

@@ -36,6 +36,14 @@ class LinksDB(object):
             this.connection.commit()
         return True
 
+    def get_feeds(this):
+        try:
+            this.cursor.execute("SELECT name, url FROM feeds WHERE active = true")
+        except sql.InternalError:
+            this.connection.rollback()
+            raise
+        return this.cursor.fetchall()
+
 
 if __name__ == '__main__':
     import requests
