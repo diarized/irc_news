@@ -164,7 +164,8 @@ if __name__ == '__main__':
     log.startLogging(sys.stdout)
     
     # create factory protocol and application
-    f = LogBotFactory(sys.argv[1], sys.argv[2])
+    # f = LogBotFactory(sys.argv[1], sys.argv[2])
+    f = LogBotFactory('#999net', '/tmp/logbot.log')
 
     # connect factory to this host and port
     reactor.connectTCP("irc.freenode.net", 6667, f)
