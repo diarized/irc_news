@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import psycopg2 as sql
-import requests
 
 class LinksDB(object):
     def __init__(this, database='api', username='ircapi', password='JestemT77'):
@@ -39,6 +38,7 @@ class LinksDB(object):
 
 
 if __name__ == '__main__':
+    import requests
     # import pprint
     # db = LinksDB()
     # print(db.cursor)
