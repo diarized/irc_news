@@ -1,5 +1,8 @@
+#!/usr/bin/env python
+
 import feedparser
 import storage
+
 
 def get_feeds():
     db = storage.LinksDB()
@@ -18,3 +21,10 @@ def parse_feeds():
             title = entry['title'].strip()
             link = entry['link'].strip()
             yield (feed_name, title, link)
+
+if __name__ == '__main__':
+    import pprint
+    for feed in get_feeds():
+        pprint.pprint(feed)
+    for entry in parse_feeds():
+        pprint.pprint(entry)
