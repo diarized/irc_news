@@ -4,14 +4,6 @@ from flask import Flask, request, jsonify
 import flask_restful as rest
 import storage
 
-app = Flask(__name__)
-api = rest.Api(app)
-db = storage.LinksDB()
-
-parser = rest.reqparse.RequestParser()
-parser.add_argument('link')
-parser.add_argument('title')
-
 class HelloWorld(rest.Resource):
     def get(this):
         return {'hello': 'world!'}
@@ -52,8 +44,13 @@ class PostApi(rest.Resource):
         abort(404, message="Method not allowed.")
 
 if __name__ == '__main__':
-    # Test at http://cheap.stonith.pl:7777/api/v1.0/links/microsoft
-    # app.run(debug=True, host='0.0.0.0', port=7777)
+    app = Flask(__name__)
+    api = rest.Api(app)
+    db = storage.LinksDB()
+
+    parser = rest.reqparse.RequestParser()
+    parser.add_argument('link')
+    parser.add_argument('title')
 
     api.add_resource(HelloWorld, '/')
     api.add_resource(LinksSearchApi, '/api/v1.0/links', '/api/v1.0/links/<link_pattern>')
