@@ -41,7 +41,7 @@ class PostApi(rest.Resource):
         return 'Adding a link failed.'
 
     def get(this):
-        abort(404, message="Method not allowed.")
+        rest.abort(404, message="Method not allowed.")
 
 if __name__ == '__main__':
     app = Flask(__name__)
