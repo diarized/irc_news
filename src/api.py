@@ -48,13 +48,6 @@ def main():
     api = rest.Api(app)
     db = storage.LinksDB()
 
-    import os
-    import ssl
-    pwd = os.path.dirname(os.path.realpath(__file__))
-    context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
-    # context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
-    context.load_cert_chain(certfile=os.path.join(pwd, "ssl/stonith.pl.crt"), keyfile=os.path.join(pwd, "ssl/stonith.pl.key"))
-
     parser = rest.reqparse.RequestParser()
     parser.add_argument('link')
     parser.add_argument('title')
@@ -63,7 +56,11 @@ def main():
     api.add_resource(LinksSearchApi, '/api/v1.0/links', '/api/v1.0/links/<link_pattern>')
     api.add_resource(TitleSearchApi, '/api/v1.0/titles', '/api/v1.0/titles/<title_pattern>')
     api.add_resource(PostApi, '/api/v1.0/add_link')
-    app.run(debug=True, host='0.0.0.0', port=7777, ssl_context=context)
+    return app
+
 
 if __name__ == '__main__':
-    main()
+    app = main()
+    app.run(debug=True, host='0.0.0.0', port=7777)
+else:
+    app = main()
