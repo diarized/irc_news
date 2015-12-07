@@ -4,9 +4,11 @@ from flask import Flask, request, jsonify
 import flask_restful as rest
 import storage
 
+
 class HelloWorld(rest.Resource):
     def get(this):
         return {'hello': 'world!'}
+
 
 class LinksSearchApi(rest.Resource):
     def post(this):
@@ -19,6 +21,7 @@ class LinksSearchApi(rest.Resource):
         rows = db.search_link(link_pattern)
         return jsonify(rows)
 
+
 class TitleSearchApi(rest.Resource):
     def post(this):
         args = parser.parse_args()
@@ -29,6 +32,7 @@ class TitleSearchApi(rest.Resource):
     def get(this, title_pattern):
         rows = db.search_title(title_pattern)
         return jsonify(rows)
+
 
 class PostApi(rest.Resource):
     def post(this):
@@ -42,6 +46,7 @@ class PostApi(rest.Resource):
 
     def get(this):
         rest.abort(404, message="Method not allowed.")
+
 
 def main():
     app = Flask(__name__)
