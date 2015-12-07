@@ -17,9 +17,7 @@ class LinksDB(object):
             print("args = ", args_string)
             this.connection.rollback()
             raise
-        if args:
-            return this.cursor.fetchall()
-        return True
+        return this.cursor.fetchall()
 
     def search_link(this, link_word):
         args = ('%' + link_word + '%',)

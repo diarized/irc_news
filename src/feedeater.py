@@ -22,9 +22,10 @@ def parse_feeds():
             link = entry['link'].strip()
             yield (feed_name, title, link)
 
+
 if __name__ == '__main__':
     import pprint
     for feed in get_feeds():
         pprint.pprint(feed)
-    for entry in parse_feeds():
-        pprint.pprint(entry)
+    for source, title, link in parse_feeds():
+        pprint.pprint((source, title, link))
