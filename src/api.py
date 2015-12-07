@@ -4,6 +4,7 @@ from flask import Flask, request, jsonify
 import flask_restful as rest
 import storage
 
+db = None
 
 class HelloWorld(rest.Resource):
     def get(this):
@@ -51,6 +52,7 @@ class PostApi(rest.Resource):
 def main():
     app = Flask(__name__)
     api = rest.Api(app)
+    global db
     db = storage.LinksDB()
 
     parser = rest.reqparse.RequestParser()

@@ -18,7 +18,7 @@ class LinksDB(object):
 
     def search_title(this, title_word):
         try:
-            this.cursor.execute("SELECT title, link FROM links WHERE link LIKE %s", ('%' + title_word + '%',))
+            this.cursor.execute("SELECT title, link FROM links WHERE title LIKE %s", ('%' + title_word + '%',))
         except sql.InternalError:
             print("title_word = ", title_word)
             this.connection.rollback()
