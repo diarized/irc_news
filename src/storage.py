@@ -1,48 +1,44 @@
 #!/usr/bin/env python
 
 import psycopg2 as sql
+from sqls import sql_list
 
 class LinksDB(object):
     def __init__(this, database='api', username='ircapi', password='JestemT77'):
         this.connection = sql.connect(database=database, user=username, password=password)
         this.cursor = this.connection.cursor()
 
-    def search_link(this, link_word):
+    def execute(this, sql_name, args=None):
         try:
-            this.cursor.execute("SELECT title, link FROM links WHERE link LIKE %s", ('%' + link_word + '%',))
+            sql_command = sql_list[sql_name]
+            this.cursor.execute(sql_command, args)
         except sql.InternalError:
-            print("link_word = ", link_word)
+            args_string = pprint.pformat(args)
+            print("args = ", args_string)
             this.connection.rollback()
             raise
-        return this.cursor.fetchall()
-
-    def search_title(this, title_word):
-        try:
-            this.cursor.execute("SELECT title, link FROM links WHERE title LIKE %s", ('%' + title_word + '%',))
-        except sql.InternalError:
-            print("title_word = ", title_word)
-            this.connection.rollback()
-            raise
-        return this.cursor.fetchall()
-
-    def add_link(this, title, link):
-        try:
-            this.cursor.execute("INSERT INTO links (title, link) VALUES (%s, %s)", (title, link))
-        except sql.ProgrammingError:
-            this.connection.rollback()
-            raise
-            return False
-        else:
-            this.connection.commit()
+        if args:
+            return this.cursor.fetchall()
         return True
 
+    def search_link(this, link_word):
+        args = ('%' + link_word + '%',)
+        links = this.execute('search_link', args)
+        return links
+
+    def search_title(this, title_word):
+        args = ('%' + title_word + '%',)
+        titles = this.execute('search_title', args)
+        return titles
+
+    def add_link(this, title, link):
+        args = (title, link)
+        confirmation = this.execute('add_link', args)
+        return confirmation
+
     def get_feeds(this):
-        try:
-            this.cursor.execute("SELECT name, url FROM feeds WHERE active = true")
-        except sql.InternalError:
-            this.connection.rollback()
-            raise
-        return this.cursor.fetchall()
+        feeds = this.execute('get_feeds')
+        return feeds
 
 
 if __name__ == '__main__':
