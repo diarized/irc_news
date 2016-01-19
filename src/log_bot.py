@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 # Based on Twisted LogBot example.
 # Author: Artur Kaminski
 # artur@monitor.stonith.pl
@@ -43,17 +44,41 @@ class MessageLogger:
     An independent logger class (because separation of application
     and protocol logic is a good thing).
     """
-    def __init__(self, file):
-        self.file = file
+    def __init__(self, file_handler):
+        self.file_handler = file_handler
 
     def log(self, message):
-        """Write a message to the file."""
+        """Write a message to the file_handler."""
         timestamp = time.strftime("[%H:%M:%S]", time.localtime(time.time()))
-        self.file.write('%s %s\n' % (timestamp, message))
-        self.file.flush()
+        self.file_handler.write('%s %s\n' % (timestamp, message))
+        self.file_handler.flush()
 
     def close(self):
-        self.file.close()
+        self.file_handler.close()
+
+
+class Pluginer(object):
+    """ Search interface to HN and other feeds """
+    def __init__(self):
+        self.nothing = 'nothing'
+
+    def command(self, message):
+        # msg = "%s: I am a log bot" % user
+        cmd_fields = message.split()
+        cmd = cmd_fields[1]
+        arguments = cmd_fields[2:]
+        plugin_output = set(["Looking for plugin {}".format(cmd)])
+        try:
+            plugin = getattr(plugins, cmd)
+        except AttributeError:
+            plugin_output.add("I do not know what '{}' means.".format(cmd))
+        else:
+            plugin_output.add(plugin(arguments))
+        for output in plugin_output:
+            yield output
+
+    def close(self):
+        pass
 
 
 class LogBot(irc.IRCClient):
@@ -66,6 +91,7 @@ class LogBot(irc.IRCClient):
         self.logger = MessageLogger(open(self.factory.filename, "a"))
         self.logger.log("[connected at %s]" % 
                         time.asctime(time.localtime(time.time())))
+        self.pluginer = Pluginer()
 
     def connectionLost(self, reason):
         irc.IRCClient.connectionLost(self, reason)
@@ -96,20 +122,11 @@ class LogBot(irc.IRCClient):
 
         # Otherwise check to see if it is a message directed at me
         if msg.startswith(self.nickname + ":"):
-            # msg = "%s: I am a log bot" % user
-            cmd_fields = msg.split()
-            command = cmd_fields[1]
-            arguments = cmd_fields[2:]
-            msg = "Looking for plugin {}".format(command)
-            self.msg(channel, msg)
             self.logger.log("<%s> %s" % (self.nickname, msg))
-            try:
-                plugin = getattr(plugins, command)
-            except AttributeError:
-                plugin_output = "I do not know what '{}' means.".format(command)
-            else:
-                plugin_output = plugin(arguments)
-            self.msg(channel, plugin_output)
+            plugin_responses = self.pluginer.command(msg)
+            for response in plugin_responses:
+                self.msg(user, response)
+                time.sleep(0.5)
 
     def action(self, user, channel, msg):
         """This will get called when the bot sees someone do an action."""
@@ -145,6 +162,7 @@ class LogBotFactory(protocol.ClientFactory):
     def __init__(self, channel, filename):
         self.channel = channel
         self.filename = filename
+
     def buildProtocol(self, addr):
         p = LogBot()
         p.factory = self
@@ -165,7 +183,7 @@ if __name__ == '__main__':
     
     # create factory protocol and application
     # f = LogBotFactory(sys.argv[1], sys.argv[2])
-    f = LogBotFactory('#999net', '/tmp/logbot.log')
+    f = LogBotFactory('#998net', '/tmp/logbot.log')
 
     # connect factory to this host and port
     reactor.connectTCP("irc.freenode.net", 6667, f)

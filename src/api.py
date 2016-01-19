@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+# Run me
+# PYTHONPATH=/home/artur/Scripts/Python/src/rss2irc ./api.py > /dev/null 2>&1 &
+
 from flask import Flask, request, jsonify
 import flask_restful as rest
 import storage
