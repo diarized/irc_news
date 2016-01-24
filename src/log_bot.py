@@ -67,15 +67,16 @@ class Pluginer(object):
         cmd_fields = message.split()
         cmd = cmd_fields[1]
         arguments = cmd_fields[2:]
-        plugin_output = set(["Looking for plugin {}".format(cmd)])
+        plugin_output = ["Looking for plugin {}".format(cmd)]
         try:
             plugin = getattr(plugins, cmd)
         except AttributeError:
-            plugin_output.add("I do not know what '{}' means.".format(cmd))
+            plugin_output.append("I do not know what '{}' means.".format(cmd))
         else:
-            plugin_output.add(plugin(arguments))
-        for output in plugin_output:
-            yield output
+            plugin_output.extend(plugin(arguments))
+        # for output in plugin_output:
+        #     yield output
+        return plugin_output
 
     def close(self):
         pass
@@ -84,7 +85,7 @@ class Pluginer(object):
 class LogBot(irc.IRCClient):
     """A logging IRC bot."""
     
-    nickname = "SpurrBot"
+    nickname = "Spurr1Bot"
     
     def connectionMade(self):
         irc.IRCClient.connectionMade(self)
@@ -124,9 +125,9 @@ class LogBot(irc.IRCClient):
         if msg.startswith(self.nickname + ":"):
             self.logger.log("<%s> %s" % (self.nickname, msg))
             plugin_responses = self.pluginer.command(msg)
-            for response in plugin_responses:
-                self.msg(user, response)
-                time.sleep(0.5)
+            for response in plugin_responses[:min([3, len(plugin_responses)])]:
+                self.msg(channel, response)
+                time.sleep(1)
 
     def action(self, user, channel, msg):
         """This will get called when the bot sees someone do an action."""
