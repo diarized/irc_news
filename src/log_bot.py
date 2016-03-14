@@ -126,7 +126,7 @@ class LogBot(irc.IRCClient):
             self.logger.log("<%s> %s" % (self.nickname, msg))
             plugin_responses = self.pluginer.command(msg)
             for response in plugin_responses[:min([3, len(plugin_responses)])]:
-                self.msg(channel, response)
+                self.msg(channel, response.encode("utf8"))
                 time.sleep(1)
 
     def action(self, user, channel, msg):
