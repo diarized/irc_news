@@ -121,13 +121,16 @@ class LogBot(irc.IRCClient):
             self.msg(user, msg)
             return
 
+        if msg == 'help':
+            self.msg(channel, 'Give me an order, like "{} google ircbot".'.format(self.nickname))
+
         # Otherwise check to see if it is a message directed at me
         if msg.startswith(self.nickname + ":"):
             self.logger.log("<%s> %s" % (self.nickname, msg))
             plugin_responses = self.pluginer.command(msg)
-            for response in plugin_responses[:min([3, len(plugin_responses)])]:
+            for response in plugin_responses:
                 self.msg(channel, response.encode("utf8"))
-                time.sleep(1)
+                time.sleep(2)
 
     def action(self, user, channel, msg):
         """This will get called when the bot sees someone do an action."""

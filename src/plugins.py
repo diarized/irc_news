@@ -2,15 +2,6 @@ import pprint
 import requests
 import json
 
-import lxml.html
-import re
-
-def strip_tag(s):
-    doc = lxml.html.fromstring(s)   # parse html string
-    txt = doc.xpath('text()')       # ['foo ', ' bar']
-    txt = ' '.join(txt)             # 'foo   bar'
-    return re.sub('\s+', ' ', txt)  # 'foo bar'
-
 def help(*args, **kwargs):
     output = ["Use google search_string to get example functionlity of the system"]
     return output
@@ -23,10 +14,11 @@ def google(searchfor=''):
     payload = {'q': searchfor}
     response = requests.get(link, headers=ua, params=payload)
     response_text = json.loads(response.text)
-    pprint.pprint(response_text)
     results = response_text['responseData']['results']
+    pprint.pprint(results)
     output = []
-    for result in results[:min(3, len(results))]:
-        output.append(strip_tag(result['title']).encode('utf-8'))
+    for result in results:
+        output.append(result['titleNoFormatting'])
         output.append(result['url'])
+    pprint.pprint(output)
     return output
