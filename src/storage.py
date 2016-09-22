@@ -2,10 +2,14 @@
 
 import psycopg2 as sql
 from sqls import sql_list
+import pprint
+
 
 class LinksDB(object):
     def __init__(this, database='api', username='ircapi', password='JestemT77'):
-        this.connection = sql.connect(database=database, user=username, password=password)
+        this.connection = sql.connect(
+            database=database, user=username, password=password
+        )
         this.cursor = this.connection.cursor()
 
     def execute(this, sql_name, args=None):

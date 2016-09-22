@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 
 # Run me
-# PYTHONPATH=/home/artur/Scripts/Python/src/rss2irc ./api.py > /dev/null 2>&1 &
+# PYTHONPATH=/home/artur/Scripts/Python/src/irc_news/src ./api.py > /dev/null 2>&1 &
 
-from flask import Flask, request, jsonify
+from flask import Flask, jsonify
 import flask_restful as rest
 import storage
 
 db = None
+parser = None
+
 
 class HelloWorld(rest.Resource):
     def get(this):
@@ -58,6 +60,7 @@ def main():
     global db
     db = storage.LinksDB()
 
+    global parser
     parser = rest.reqparse.RequestParser()
     parser.add_argument('link')
     parser.add_argument('title')

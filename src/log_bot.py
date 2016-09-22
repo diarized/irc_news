@@ -5,39 +5,16 @@
 # artur@monitor.stonith.pl
 # diarized@GitHub
 
-"""
-An example IRC log bot - logs a channel's events to a file.
-
-If someone says the bot's name in the channel followed by a ':',
-e.g.
-
-    <foo> logbot: hello!
-
-the bot will reply:
-
-    <logbot> foo: I am a log bot
-
-Run this script with two arguments, the channel name the bot should
-connect to, and file to log to, e.g.:
-
-    $ python ircLogBot.py test test.log
-
-will log channel #test to the file 'test.log'.
-
-To run the script:
-
-    $ python ircLogBot.py <channel> <file>
-"""
-
-
 # twisted imports
 from twisted.words.protocols import irc
 from twisted.internet import reactor, protocol
 from twisted.python import log
 
 # system imports
-import time, sys
+import time
+import sys
 import plugins
+
 
 class MessageLogger:
     """
@@ -68,6 +45,7 @@ class Pluginer(object):
         cmd = cmd_fields[1]
         arguments = cmd_fields[2:]
         plugin_output = ["Looking for plugin {}".format(cmd)]
+        reload(plugins)
         try:
             plugin = getattr(plugins, cmd)
         except AttributeError:
@@ -84,25 +62,17 @@ class Pluginer(object):
 
 class LogBot(irc.IRCClient):
     """A logging IRC bot."""
-    
+
     nickname = "Spurr1Bot"
-    
+
     def connectionMade(self):
         irc.IRCClient.connectionMade(self)
-        self.logger = MessageLogger(open(self.factory.filename, "a"))
-        self.logger.log("[connected at %s]" % 
-                        time.asctime(time.localtime(time.time())))
         self.pluginer = Pluginer()
 
     def connectionLost(self, reason):
         irc.IRCClient.connectionLost(self, reason)
-        self.logger.log("[disconnected at %s]" % 
-                        time.asctime(time.localtime(time.time())))
-        self.logger.close()
-
 
     # callbacks for events
-
     def signedOn(self):
         """Called when bot has succesfully signed on to server."""
         self.join(self.factory.channel)
@@ -135,13 +105,11 @@ class LogBot(irc.IRCClient):
         self.logger.log("* %s %s" % (user, msg))
 
     # irc callbacks
-
     def irc_NICK(self, prefix, params):
         """Called when an IRC user changes their nickname."""
         old_nick = prefix.split('!')[0]
         new_nick = params[0]
         self.logger.log("%s is now known as %s" % (old_nick, new_nick))
-
 
     # For fun, override the method that determines how a nickname is changed on
     # collisions. The default method appends an underscore.
@@ -151,7 +119,6 @@ class LogBot(irc.IRCClient):
         effort to create an unused related name for subsequent registration.
         """
         return nickname + '^'
-
 
 
 class LogBotFactory(protocol.ClientFactory):
@@ -181,7 +148,7 @@ class LogBotFactory(protocol.ClientFactory):
 if __name__ == '__main__':
     # initialize logging
     log.startLogging(sys.stdout)
-    
+
     # create factory protocol and application
     # f = LogBotFactory(sys.argv[1], sys.argv[2])
     f = LogBotFactory('#998net', '/tmp/logbot.log')
