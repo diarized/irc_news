@@ -61,3 +61,5 @@ if __name__ == '__main__':
     r = requests.post(db_get_link_url, test_values)
     print r.text
     # db.connection.close()
+else:
+    db = LinksDB()
