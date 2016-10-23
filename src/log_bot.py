@@ -13,25 +13,11 @@ from twisted.python import log
 # system imports
 import time
 import sys
+import pprint
 import plugins
 
-
-class MessageLogger:
-    """
-    An independent logger class (because separation of application
-    and protocol logic is a good thing).
-    """
-    def __init__(self, file_handler):
-        self.file_handler = file_handler
-
-    def log(self, message):
-        """Write a message to the file_handler."""
-        timestamp = time.strftime("[%H:%M:%S]", time.localtime(time.time()))
-        self.file_handler.write('%s %s\n' % (timestamp, message))
-        self.file_handler.flush()
-
-    def close(self):
-        self.file_handler.close()
+reload(sys)
+sys.setdefaultencoding('utf8')
 
 
 class Pluginer(object):
@@ -40,20 +26,18 @@ class Pluginer(object):
         self.nothing = 'nothing'
 
     def command(self, message):
-        # msg = "%s: I am a log bot" % user
         cmd_fields = message.split()
+        # cmd_fields[0] is my nick
         cmd = cmd_fields[1]
         arguments = cmd_fields[2:]
-        plugin_output = ["Looking for plugin {}".format(cmd)]
         reload(plugins)
         try:
             plugin = getattr(plugins, cmd)
         except AttributeError:
-            plugin_output.append("I do not know what '{}' means.".format(cmd))
+            plugin_output = ["I do not know what '{}' means.".format(cmd)]
         else:
-            plugin_output.extend(plugin(arguments))
-        # for output in plugin_output:
-        #     yield output
+            plugin_output = plugin(arguments)
+            pprint.pprint(plugin_output)
         return plugin_output
 
     def close(self):
@@ -79,12 +63,12 @@ class LogBot(irc.IRCClient):
 
     def joined(self, channel):
         """This will get called when the bot joins the channel."""
-        self.logger.log("[I have joined %s]" % channel)
+        self.msg(channel, "[I have joined %s]" % channel)
 
     def privmsg(self, user, channel, msg):
         """This will get called when the bot receives a message."""
         user = user.split('!', 1)[0]
-        self.logger.log("<%s> %s" % (user, msg))
+        self.msg(channel, "<%s> %s" % (user, msg))
         # Check to see if they're sending me a private message
         if channel == self.nickname:
             msg = "It isn't nice to whisper!  Play nice with the group."
@@ -92,27 +76,35 @@ class LogBot(irc.IRCClient):
             return
 
         if msg == 'help':
-            self.msg(channel, 'Give me an order, like "{} google ircbot".'.format(self.nickname))
+            self.msg(
+                channel,
+                'Give me an order, like "{} google ircbot".'.format(
+                    self.nickname
+                )
+            )
 
         # Otherwise check to see if it is a message directed at me
         if msg.startswith(self.nickname + ":"):
-            self.logger.log("<%s> %s" % (self.nickname, msg))
-            plugin_responses = self.pluginer.command(msg)
-            for response in plugin_responses[:min([3, len(plugin_responses)])]:
-                self.msg(channel, response.encode("utf8"))
-                time.sleep(2)
+            self.msg(channel, "<%s> %s" % (self.nickname, msg))
+            responses = self.pluginer.command(msg)
+            try:
+                for response in responses[:min([3, len(responses)])]:
+                    self.msg(channel, response.encode("utf8"))
+                    time.sleep(1)
+            except TypeError:
+                self.msg(channel, 'No responce from {}'.format(msg))
 
     def action(self, user, channel, msg):
         """This will get called when the bot sees someone do an action."""
         user = user.split('!', 1)[0]
-        self.logger.log("* %s %s" % (user, msg))
+        self.msg(channel, "* %s %s" % (user, msg))
 
     # irc callbacks
     def irc_NICK(self, prefix, params):
         """Called when an IRC user changes their nickname."""
-        old_nick = prefix.split('!')[0]
-        new_nick = params[0]
-        self.logger.log("%s is now known as %s" % (old_nick, new_nick))
+        # old_nick = prefix.split('!')[0]
+        # new_nick = params[0]
+        # self.msg(channel, "%s is now known as %s" % (old_nick, new_nick))
 
     # For fun, override the method that determines how a nickname is changed on
     # collisions. The default method appends an underscore.

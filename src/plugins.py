@@ -1,8 +1,7 @@
-import pprint
-import requests
-import json
 import lxml.html
 import re
+import duckduckgo
+import pprint
 
 
 def strip_tag(s):
@@ -13,22 +12,25 @@ def strip_tag(s):
 
 
 def help(*args, **kwargs):
-    output = ["Use google search_string to get example functionlity of the system"]
+    output = ["Use `ddg ircbot` as an example"]
     return output
 
 
 def google(searchfor=''):
-    if not len(searchfor):
-        return ['']
-    link = 'http://ajax.googleapis.com/ajax/services/search/web?v=1.0&{}'.format(searchfor)
-    ua = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.116 Safari/537.36'}
-    payload = {'q': searchfor}
-    response = requests.get(link, headers=ua, params=payload)
-    response_text = json.loads(response.text)
-    results = response_text['responseData']['results']
-    output = []
-    for result in results[:min(3, len(results))]:
-        output.append(strip_tag(result['title']).encode('utf-8'))
-        output.append(result['url'])
-    pprint.pprint(results)
-    return output
+    return ['Google search available only with Custom Search Engine API']
+
+
+def ddg(query=None):
+    searchfor = ' '.join(query)
+    if not searchfor or not len(searchfor):
+        return ['Search term not defined']
+    result = duckduckgo.query(searchfor)
+    for key in [result.definition, result.abstract, result.answer]:
+        try:
+            answer = key.text
+            if answer and len(answer):
+                pprint.pprint(answer)
+                return [answer]
+        except TypeError:
+            pass
+    return ['No results for "{}"'.format(searchfor)]
