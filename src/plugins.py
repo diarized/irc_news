@@ -1,9 +1,9 @@
 import pprint
 import requests
 import json
-
 import lxml.html
 import re
+
 
 def strip_tag(s):
     doc = lxml.html.fromstring(s)   # parse html string
@@ -12,7 +12,14 @@ def strip_tag(s):
     return re.sub('\s+', ' ', txt)  # 'foo bar'
 
 
+def help(*args, **kwargs):
+    output = ["Use google search_string to get example functionlity of the system"]
+    return output
+
+
 def google(searchfor=''):
+    if not len(searchfor):
+        return ['']
     link = 'http://ajax.googleapis.com/ajax/services/search/web?v=1.0&{}'.format(searchfor)
     ua = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.116 Safari/537.36'}
     payload = {'q': searchfor}
@@ -23,4 +30,5 @@ def google(searchfor=''):
     for result in results[:min(3, len(results))]:
         output.append(strip_tag(result['title']).encode('utf-8'))
         output.append(result['url'])
+    pprint.pprint(results)
     return output
