@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # Run me
-# PYTHONPATH=/home/artur/Scripts/Python/src/irc_news/src ./api.py > /dev/null 2>&1 &
+# PYTHONPATH=$HOME/Scripts/Python/src/irc_news/src ./api.py > /dev/null 2>&1 &
 
 from flask import Flask, jsonify
 import flask_restful as rest
