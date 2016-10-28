@@ -1,7 +1,8 @@
 import lxml.html
 import re
 import duckduckgo
-import pprint
+import rssfeed
+import urlparse
 
 
 def strip_tag(s):
@@ -24,13 +25,18 @@ def ddg(query=None):
     searchfor = ' '.join(query)
     if not searchfor or not len(searchfor):
         return ['Search term not defined']
-    result = duckduckgo.query(searchfor)
-    for key in [result.definition, result.abstract, result.answer]:
-        try:
-            answer = key.text
-            if answer and len(answer):
-                pprint.pprint(answer)
-                return [answer]
-        except TypeError:
-            pass
-    return ['No results for "{}"'.format(searchfor)]
+    result = duckduckgo.get_zci(searchfor)
+    return [result]
+
+
+def rss(args):
+    reload(rssfeed)
+    url_parts = urlparse.urlparse(args[0])
+    url = url_parts[0] + '://' + url_parts[1] + '/' + url_parts[2]
+    feeder = rssfeed.RSSFeed('RSS feed', url)
+    result = []
+    for title, link in feeder.get_entries():
+        if not title.startswith('/') and not link.startswith('/'):
+            result.append(title)
+            result.append('    ' + link)
+    return result

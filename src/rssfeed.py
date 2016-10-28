@@ -1,5 +1,6 @@
 import feedparser
 
+
 class RSSFeed(object):
     def __init__(self, name, url):
         self.name = name
@@ -10,7 +11,6 @@ class RSSFeed(object):
 
     def get_entries(self):
         content = self._download()
-        encoded = []
         for entry in content['entries']:
             title = entry['title'].encode('ascii', 'ignore')
             link = entry['link'].encode('ascii', 'ignore')

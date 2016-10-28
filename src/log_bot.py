@@ -88,9 +88,9 @@ class LogBot(irc.IRCClient):
             self.msg(channel, "<%s> %s" % (self.nickname, msg))
             responses = self.pluginer.command(msg)
             try:
-                for response in responses[:min([3, len(responses)])]:
+                for response in responses[:min([6, len(responses)])]:
                     self.msg(channel, response.encode("utf8"))
-                    time.sleep(1)
+                    time.sleep(2)
             except TypeError:
                 self.msg(channel, 'No responce from {}'.format(msg))
 
