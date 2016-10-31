@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Based on Twisted LogBot example.
+# Based on Twisted PluginLogBot example.
 # Author: Artur Kaminski
 # artur@monitor.stonith.pl
 # diarized@GitHub
@@ -44,7 +44,7 @@ class Pluginer(object):
         pass
 
 
-class LogBot(irc.IRCClient):
+class PluginLogBot(irc.IRCClient):
     """A logging IRC bot."""
 
     nickname = "Spurr1Bot"
@@ -116,8 +116,8 @@ class LogBot(irc.IRCClient):
         return nickname + '^'
 
 
-class LogBotFactory(protocol.ClientFactory):
-    """A factory for LogBots.
+class PluginBotFactory(protocol.ClientFactory):
+    """A factory for PluginLogBots.
 
     A new protocol instance will be created each time we connect to the server.
     """
@@ -127,7 +127,7 @@ class LogBotFactory(protocol.ClientFactory):
         self.filename = filename
 
     def buildProtocol(self, addr):
-        p = LogBot()
+        p = PluginLogBot()
         p.factory = self
         return p
 
@@ -145,8 +145,8 @@ if __name__ == '__main__':
     log.startLogging(sys.stdout)
 
     # create factory protocol and application
-    # f = LogBotFactory(sys.argv[1], sys.argv[2])
-    f = LogBotFactory('#998net', '/tmp/logbot.log')
+    # f = PluginBotFactory(sys.argv[1], sys.argv[2])
+    f = PluginBotFactory('#998net', '/tmp/logbot.log')
 
     # connect factory to this host and port
     reactor.connectTCP("irc.freenode.net", 6667, f)
