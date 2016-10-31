@@ -25,11 +25,14 @@ def ddg(query=None):
     searchfor = ' '.join(query)
     if not searchfor or not len(searchfor):
         return ['Search term not defined']
-    result = duckduckgo.get_zci(searchfor)
+    try:
+        result = duckduckgo.get_zci(searchfor)
+    except ValueError:
+        return ['Plugin found no results']
     return [result]
 
 
-def rss(args):
+def rss(args, max_entries=6):
     reload(rssfeed)
     url_parts = urlparse.urlparse(args[0])
     url = url_parts[0] + '://' + url_parts[1] + '/' + url_parts[2]
@@ -39,4 +42,4 @@ def rss(args):
         if not title.startswith('/') and not link.startswith('/'):
             result.append(title)
             result.append('    ' + link)
-    return result
+            return result[:2*max_entries]

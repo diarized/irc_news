@@ -37,7 +37,7 @@ class Pluginer(object):
             plugin_output = ["I do not know what '{}' means.".format(cmd)]
         else:
             plugin_output = plugin(arguments)
-            pprint.pprint(plugin_output)
+            # pprint.pprint(plugin_output)
         return plugin_output
 
     def close(self):
@@ -68,7 +68,7 @@ class PluginLogBot(irc.IRCClient):
     def privmsg(self, user, channel, msg):
         """This will get called when the bot receives a message."""
         user = user.split('!', 1)[0]
-        self.msg(channel, "<%s> %s" % (user, msg))
+        # self.msg(channel, "<%s> %s" % (user, msg))
         # Check to see if they're sending me a private message
         if channel == self.nickname:
             msg = "It isn't nice to whisper!  Play nice with the group."
@@ -78,7 +78,7 @@ class PluginLogBot(irc.IRCClient):
         if msg == 'help':
             self.msg(
                 channel,
-                'Give me an order, like "{} google ircbot".'.format(
+                'Give me an order, like "{}: ddg ircbot".'.format(
                     self.nickname
                 )
             )
@@ -87,10 +87,12 @@ class PluginLogBot(irc.IRCClient):
         if msg.startswith(self.nickname + ":"):
             self.msg(channel, "<%s> %s" % (self.nickname, msg))
             responses = self.pluginer.command(msg)
+            if not len(responses):
+                return
             try:
-                for response in responses[:min([6, len(responses)])]:
+                for response in responses:
                     self.msg(channel, response.encode("utf8"))
-                    time.sleep(2)
+                    time.sleep(1) # Be polite, no flooding
             except TypeError:
                 self.msg(channel, 'No responce from {}'.format(msg))
 
@@ -133,6 +135,7 @@ class PluginBotFactory(protocol.ClientFactory):
 
     def clientConnectionLost(self, connector, reason):
         """If we get disconnected, reconnect to server."""
+        time.sleep(12) # Have I flooded the channel?
         connector.connect()
 
     def clientConnectionFailed(self, connector, reason):
