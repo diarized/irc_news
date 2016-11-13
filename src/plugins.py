@@ -2,7 +2,6 @@ import lxml.html
 import re
 import duckduckgo
 import rssfeed
-import urlparse
 
 
 def strip_tag(s):
@@ -32,14 +31,17 @@ def ddg(query=None):
     return [result]
 
 
-def rss(args, max_entries=6):
+def rss(args):
     reload(rssfeed)
-    url_parts = urlparse.urlparse(args[0])
-    url = url_parts[0] + '://' + url_parts[1] + '/' + url_parts[2]
-    feeder = rssfeed.RSSFeed('RSS feed', url)
+    url = args[0]
+    try:
+        max_entries = args[1]
+        feeder = rssfeed.RSSFeed('RSS feed', url, max_entries)
+    except IndexError:
+        feeder = rssfeed.RSSFeed('RSS feed', url)
     result = []
     for title, link in feeder.get_entries():
         if not title.startswith('/') and not link.startswith('/'):
             result.append(title)
             result.append('    ' + link)
-            return result[:2*max_entries]
+    return result

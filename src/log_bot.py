@@ -89,9 +89,13 @@ class PluginLogBot(irc.IRCClient):
             responses = self.pluginer.command(msg)
             if not len(responses):
                 return
+            print('I received {} responses'.format(len(responses)))
             try:
                 for response in responses:
-                    self.msg(channel, response.encode("utf8"))
+                    message = response.encode("utf8")
+                    print('I am going to send "{}"'.format(message))
+                    self.msg(channel, message)
+                    print('Slipping a second')
                     time.sleep(1) # Be polite, no flooding
             except TypeError:
                 self.msg(channel, 'No responce from {}'.format(msg))
